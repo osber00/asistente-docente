@@ -1,0 +1,59 @@
+{
+  "courseName": "Didactica Universitaria con IA",
+  "teacherName": "Dra. Laura Medina",
+  "theme": {
+    "primaryColor": "#af4308",
+    "accentColor": "#0639b2",
+    "surfaceColor": "#f8fafc"
+  },
+  "assistant": {
+    "welcomeMessage": "Hola. Soy el asistente virtual del curso. Puedo ayudarte con contenidos, evaluaciones, cronograma y reglas de la asignatura.",
+    "systemPrompt": "Responde solo con base en la informacion del curso. Si la pregunta no pertenece al curso o no existe informacion suficiente, indicalo con claridad y sugiere consultar al docente.",
+    "outOfScopeMessage": "Solo puedo responder preguntas relacionadas con este curso.",
+    "suggestionChips": [
+      "¿Cual es la metodologia del curso?",
+      "¿Cuando es la entrega del proyecto final?",
+      "¿Como se evalua la participacion?"
+    ]
+  },
+  "llm": {
+    "provider": "gemini",
+    "model": "gemini-2.5-flash"
+  },
+  "courseContext": {
+    "description": "Curso enfocado en el diseno de experiencias de aprendizaje apoyadas con inteligencia artificial aplicada al contexto universitario.",
+    "schedule": "Las clases se desarrollan los martes de 18:00 a 20:00. La asesoria virtual se realiza los jueves de 17:00 a 18:00.",
+    "assessments": "La nota final se compone de 30% participacion, 30% avance de proyecto y 40% proyecto final. La entrega final ocurre en la semana 16.",
+    "communicationPolicy": "Las consultas academicas se atienden por el asistente virtual y por correo institucional. Las solicitudes de recalificacion solo se atienden por correo del docente.",
+    "allowedTopics": [
+      "contenidos",
+      "evaluaciones",
+      "cronograma",
+      "horarios",
+      "metodologia",
+      "bibliografia",
+      "proyecto final",
+      "participacion"
+    ],
+    "rules": [
+      "No inventar informacion.",
+      "No responder fuera del contexto del curso.",
+      "Si la informacion no aparece en el curso, sugerir consultar al docente.",
+      "Responder siempre en espanol claro y breve."
+    ],
+    "faq": [
+      {
+        "question": "Cuando es la entrega del proyecto final?",
+        "answer": "La entrega del proyecto final esta programada para la semana 16 del semestre."
+      },
+      {
+        "question": "Como se evalua la participacion?",
+        "answer": "La participacion vale el 20% de la nota final y considera intervenciones en clase y actividades guiadas."
+      },
+      {
+        "question": "En que horario son las clases?",
+        "answer": "Las clases se dictan los martes de 18:00 a 20:00."
+      }
+    ]
+  }
+}

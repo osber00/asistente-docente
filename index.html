@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Asistente Virtual del Curso</title>
+    <meta name="description" content="Plantilla de asistente virtual docente lista para desplegar en Netlify.">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body class="page-shell">
+    <main class="app-layout">
+      <section class="hero-card">
+        <p class="eyebrow">Asistente virtual del curso</p>
+        <h1 id="course-name">Cargando curso...</h1>
+        <p class="hero-copy" id="teacher-name">Cargando docente...</p>
+        <div class="status-row">
+          <span class="status-badge" id="provider-badge">Proveedor: cargando...</span>
+          <span class="status-badge muted">Solo responde dentro del curso</span>
+        </div>
+        <p class="hero-note">Este asistente responde solo preguntas relacionadas con la asignatura.</p>
+        <div class="chip-row" id="suggestion-chips"></div>
+      </section>
+
+      <section class="chat-card" aria-label="Chat del asistente">
+        <div class="chat-header">
+          <div>
+            <h2>Consulta del estudiante</h2>
+            <p id="welcome-message">Cargando mensaje inicial...</p>
+          </div>
+          <a class="text-link" href="./config.html">Configurar plantilla</a>
+        </div>
+
+        <div class="chat-log" id="chat-log" aria-live="polite"></div>
+
+        <form id="chat-form" class="chat-form">
+          <label class="sr-only" for="message">Escribe tu pregunta</label>
+          <textarea id="message" name="message" rows="3" maxlength="1000" placeholder="Ejemplo: ¿Como se evalua el proyecto final?" required></textarea>
+          <div class="chat-actions">
+            <p class="helper-text">`Enter` envia el mensaje. `Shift + Enter` agrega una nueva linea.</p>
+            <button type="submit" id="send-button">Enviar</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <template id="message-template">
+      <article class="message">
+        <p class="message-role"></p>
+        <p class="message-text"></p>
+      </article>
+    </template>
+
+    <script src="./local-chat.js" defer></script>
+    <script src="./app.js" defer></script>
+  </body>
+</html>

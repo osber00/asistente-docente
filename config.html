@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Configurar Asistente del Curso</title>
+    <meta name="description" content="Formulario visual para personalizar la plantilla del asistente virtual docente.">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body class="page-shell config-page">
+    <main class="config-layout">
+      <section class="hero-card compact">
+        <p class="eyebrow">Configuracion docente</p>
+        <h1>Personaliza tu asistente</h1>
+        <p class="hero-copy">Esta vista sirve para editar la configuracion y descargar un nuevo <code>course-data.json</code>.</p>
+        <p class="hero-note">La proteccion de esta pagina es basica y solo evita ediciones accidentales. No reemplaza autenticacion real.</p>
+        <div class="info-strip">
+          <span class="status-badge">Gemini: recomendado para empezar</span>
+          <span class="status-badge">Grok: alternativa conversacional</span>
+          <span class="status-badge warning">OpenAI GPT-5.4: servicio pago</span>
+        </div>
+      </section>
+
+      <section class="chat-card">
+        <div id="access-panel" class="access-panel">
+          <label for="access-code">Codigo de acceso a la configuracion</label>
+          <div class="access-row">
+            <input id="access-code" name="access-code" type="password" placeholder="Ingresa el codigo de acceso">
+            <button id="unlock-button" type="button">Ingresar</button>
+          </div>
+          <p class="helper-text">Codigo demo inicial: <code>docente2026</code>. Cambialo antes de distribuir la plantilla.</p>
+        </div>
+
+        <form id="config-form" class="config-form hidden">
+          <section class="config-section">
+            <div class="section-heading">
+              <h2>Datos generales</h2>
+              <p>Personaliza nombre del curso, docente y apariencia principal.</p>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                <span>Nombre del curso</span>
+                <input name="courseName" required>
+              </label>
+
+              <label>
+                <span>Nombre del docente</span>
+                <input name="teacherName" required>
+              </label>
+
+              <label>
+                <span>Color principal</span>
+                <input name="primaryColor" type="color" required>
+              </label>
+
+              <label>
+                <span>Color de acento</span>
+                <input name="accentColor" type="color" required>
+              </label>
+
+              <label class="full-width">
+                <span>Mensaje de bienvenida</span>
+                <textarea name="welcomeMessage" rows="3" required></textarea>
+              </label>
+            </div>
+          </section>
+
+          <section class="config-section provider-section">
+            <div class="section-heading">
+              <h2>Servicio de IA</h2>
+              <p>El docente elige entre Gemini, Grok y OpenAI. OpenAI se muestra como servicio pago.</p>
+            </div>
+
+            <div class="provider-grid" id="provider-grid">
+              <button class="provider-card" type="button" data-provider-option="gemini">
+                <strong>Gemini</strong>
+                <span>Freemium. Recomendado para talleres y primeras pruebas.</span>
+              </button>
+              <button class="provider-card" type="button" data-provider-option="grok">
+                <strong>Grok</strong>
+                <span>Freemium. Conversacional y rapido para apoyo academico.</span>
+              </button>
+              <button class="provider-card" type="button" data-provider-option="openai">
+                <strong>OpenAI GPT-5.4</strong>
+                <span>Pago. Mayor estabilidad para produccion.</span>
+              </button>
+            </div>
+
+            <div class="form-grid provider-form-grid">
+              <label>
+                <span>Proveedor LLM</span>
+                <select name="provider">
+                  <option value="gemini">Gemini</option>
+                  <option value="grok">Grok</option>
+                  <option value="openai">OpenAI</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Modelo</span>
+                <input name="model" required>
+              </label>
+
+              <div class="provider-help-card full-width" id="provider-help">
+                <p class="provider-help-title">Cargando informacion del proveedor...</p>
+                <p class="provider-help-copy"></p>
+                <p class="provider-help-copy"><strong>Variable de entorno:</strong> <code id="provider-env-key"></code></p>
+              </div>
+            </div>
+          </section>
+
+          <section class="config-section">
+            <div class="section-heading">
+              <h2>Prompt principal</h2>
+              <p>Define la forma de responder del asistente y el mensaje de rechazo fuera de contexto.</p>
+            </div>
+
+            <div class="form-grid">
+              <label class="full-width">
+                <span>Prompt principal</span>
+                <textarea name="systemPrompt" rows="5" required></textarea>
+              </label>
+
+              <label class="full-width">
+                <span>Mensaje fuera de contexto</span>
+                <textarea name="outOfScopeMessage" rows="2" required></textarea>
+              </label>
+            </div>
+          </section>
+
+          <section class="config-section">
+            <div class="section-heading">
+              <h2>Contenido del curso</h2>
+              <p>Entre mas claro sea este bloque, mejores respuestas dara el asistente.</p>
+            </div>
+
+            <div class="form-grid">
+              <label class="full-width">
+                <span>Descripcion del curso</span>
+                <textarea name="description" rows="4" required></textarea>
+              </label>
+
+              <label class="full-width">
+                <span>Cronograma u horarios</span>
+                <textarea name="schedule" rows="3"></textarea>
+              </label>
+
+              <label class="full-width">
+                <span>Evaluaciones</span>
+                <textarea name="assessments" rows="3"></textarea>
+              </label>
+
+              <label class="full-width">
+                <span>Politica de comunicacion</span>
+                <textarea name="communicationPolicy" rows="3"></textarea>
+              </label>
+
+              <label class="full-width">
+                <span>Temas permitidos, uno por linea</span>
+                <textarea name="allowedTopics" rows="5"></textarea>
+              </label>
+
+              <label class="full-width">
+                <span>Reglas del asistente, una por linea</span>
+                <textarea name="rules" rows="5"></textarea>
+              </label>
+
+              <label class="full-width">
+                <span>Preguntas sugeridas, una por linea</span>
+                <textarea name="suggestionChips" rows="4"></textarea>
+              </label>
+
+              <label class="full-width">
+                <span>FAQ en formato pregunta | respuesta, una por linea</span>
+                <textarea name="faq" rows="8"></textarea>
+              </label>
+            </div>
+          </section>
+
+          <div class="chat-actions">
+            <p class="helper-text">El formulario descarga un nuevo JSON. Luego reemplaza el archivo original antes de desplegar en Netlify.</p>
+            <button type="submit">Descargar course-data.json</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="chat-card hidden" id="preview-panel">
+        <div class="chat-header">
+          <div>
+            <h2>Vista previa del JSON</h2>
+            <p>Revisa rapidamente la configuracion generada.</p>
+          </div>
+        </div>
+        <pre class="json-preview" id="json-preview"></pre>
+      </section>
+    </main>
+
+    <script src="./config.js" defer></script>
+  </body>
+</html>
