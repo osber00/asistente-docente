@@ -1,14 +1,14 @@
 {
-  "courseName": "Didáctica Universitaria con IA",
-  "teacherName": "Carla Torres",
+  "courseName": "Vida Universitaria",
+  "teacherName": "María Flórez",
   "theme": {
-    "primaryColor": "#0c6c3e",
-    "accentColor": "#f8a02b",
+    "primaryColor": "#b9d539",
+    "accentColor": "#b9d539",
     "surfaceColor": "#f8fafc"
   },
   "assistant": {
     "welcomeMessage": "Hola. Soy el asistente virtual del curso. Puedo ayudarte con contenidos, evaluaciones, cronograma y reglas de la asignatura.",
-    "systemPrompt": "Responde solo con base en la informacion del curso. Atiende las dudas como apoyo para estudiantes, con un tono amable y claro. Si la pregunta es ambigua, pide una aclaracion breve. Si la pregunta no pertenece al curso o no existe informacion suficiente, indicalo con claridad y sugiere consultar al docente.",
+    "systemPrompt": "Responde solo con base en la información del curso. Atiende las dudas como apoyo para estudiantes, con un tono amable y claro. Si la pregunta es ambigua, pide una aclaración breve. Si la pregunta no pertenece al curso o no existe información suficiente, indícalo con claridad y sugiere consultar al docente.",
     "outOfScopeMessage": "Solo puedo responder preguntas relacionadas con este curso.",
     "suggestionChips": [
       "¿Cuál es la metodología del curso?",
@@ -22,6 +22,6 @@
     "model": "kimi-k2.5"
   },
   "courseContext": {
-    "knowledgeBase": "Curso enfocado en el diseno de experiencias de aprendizaje apoyadas con inteligencia artificial aplicada al contexto universitario.\n\nLa metodologia del curso combina clases guiadas, debate, actividades aplicadas y un proyecto final.\n\nLas clases se desarrollan los martes de 18:00 a 20:00. La asesoria virtual se realiza los jueves de 17:00 a 18:00.\n\nLa nota final se compone de 30% participacion, 30% avance de proyecto y 40% proyecto final. La entrega final ocurre en la semana 16.\n\nEl curso se organiza en 4 unidades: fundamentos de didactica, diseno de experiencias, integracion de IA y evaluacion de propuestas educativas.\n\nSi, hay 2 foros obligatorios en el semestre. Uno en la semana 5 sobre etica y otro en la semana 11 sobre implementacion de IA en el aula.\n\nLas lecturas recomendadas se publican por unidad en el aula virtual. Para iniciar, revisa el capitulo 1 de didactica universitaria y el documento base sobre usos pedagogicos de IA compartido en la primera semana.\n\nLas consultas academicas se atienden por el asistente virtual y por correo institucional. Las solicitudes de recalificacion solo se atienden por correo del docente.\n\nEl asistente debe responder solo sobre contenidos, evaluaciones, cronograma, metodologia, lecturas, unidades, foros, recursos y proyecto final. Si la informacion no aparece en este bloque, debe indicar que el estudiante consulte al docente."
+    "knowledgeBase": "Curso enfocado en el diseno de experiencias de aprendizaje apoyadas con inteligencia artificial aplicada al contexto universitario.\n\nLa metodologia del curso combina clases guiadas, debate, actividades aplicadas y un proyecto final.\n\nLas clases se desarrollan los martes de 18:00 a 20:00. La asesoria virtual se realiza los jueves de 17:00 a 18:00.\n\nLa nota final se compone de 30% participacion, 30% avance de proyecto y 40% proyecto final. La entrega final ocurre en la semana 16.\n\nEl curso se organiza en 4 unidades: fundamentos de didactica, diseno de experiencias, integracion de IA y evaluacion de propuestas educativas.\n\nSi, hay 2 foros obligatorios en el semestre. Uno en la semana 5 sobre etica y otro en la semana 11 sobre implementacion de IA en el aula.\n\nInformación de la rúbrica de la actividad 1: https://infolibros.org/libro/el-misterioso-caso-de-styles-agatha-christie/\n\nLas lecturas recomendadas se publican por unidad en el aula virtual. Para iniciar, revisa el capitulo 1 de didactica universitaria y el documento base sobre usos pedagogicos de IA compartido en la primera semana.\n\nLas consultas academicas se atienden por el asistente virtual y por correo institucional. Las solicitudes de recalificacion solo se atienden por correo del docente.\n\nEl asistente debe responder solo sobre contenidos, evaluaciones, cronograma, metodologia, lecturas, unidades, foros, recursos y proyecto final. Si la informacion no aparece en este bloque, debe indicar que el estudiante consulte al docente."
   }
 }
