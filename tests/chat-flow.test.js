@@ -7,11 +7,11 @@ const { buildPrompt } = require("../netlify/functions/prompt-builder");
 const { createChatHandler } = require("../netlify/functions/chat");
 const { callProvider, getProviderSettings, ConfigurationError } = require("../netlify/functions/providers");
 
-test("encuentra una respuesta FAQ directa", () => {
+test("detecta preguntas del curso dentro del bloque unico de informacion", () => {
   const match = findBestCourseMatch("¿Cuando es la entrega del proyecto final?", sampleCourseData);
 
   assert.equal(match.isInScope, true);
-  assert.equal(match.directFaqMatch.answer, "La entrega del proyecto final esta programada para la semana 16 del semestre.");
+  assert.equal(match.directFaqMatch, null);
 });
 
 test("rechaza una pregunta fuera del curso", () => {
@@ -26,36 +26,84 @@ test("construye un prompt con reglas y contexto del curso", () => {
   const prompt = buildPrompt(sampleCourseData, "Explica la metodologia del curso", match);
 
   assert.match(prompt.systemPrompt, /Didactica Universitaria con IA/);
-  assert.match(prompt.systemPrompt, /No responder fuera del contexto del curso/);
+  assert.match(prompt.systemPrompt, /Bloque oficial de informacion del curso/);
   assert.match(prompt.userPrompt, /metodologia/);
 });
 
-test("la funcion responde FAQ sin invocar el proveedor", async () => {
+test("preguntas sobre horario entran al contexto desde el bloque unico", async () => {
+  const forumsMatch = findBestCourseMatch("Hay foros?", sampleCourseData);
+  const readingsMatch = findBestCourseMatch("lecturas recomendadas?", sampleCourseData);
+  const unitsMatch = findBestCourseMatch("Cuantas unidades?", sampleCourseData);
+  const scheduleMatch = findBestCourseMatch("En que horario son las clases?", sampleCourseData);
+
+  assert.equal(forumsMatch.isInScope, true);
+  assert.equal(readingsMatch.isInScope, true);
+  assert.equal(unitsMatch.isInScope, true);
+  assert.equal(scheduleMatch.isInScope, true);
+});
+
+test("preguntas cortas estudiantiles sobre el curso entran al contexto", () => {
+  const forumsMatch = findBestCourseMatch("Hay foros?", sampleCourseData);
+  const readingsMatch = findBestCourseMatch("lecturas recomendadas?", sampleCourseData);
+  const unitsMatch = findBestCourseMatch("Cuantas unidades?", sampleCourseData);
+
+  assert.equal(forumsMatch.isInScope, true);
+  assert.equal(readingsMatch.isInScope, true);
+  assert.equal(unitsMatch.isInScope, true);
+});
+
+test("la funcion usa el proveedor para preguntas cortas del curso", async () => {
   let providerCalls = 0;
   const handler = createChatHandler({
     readCourseData: async () => sampleCourseData,
     callProvider: async () => {
       providerCalls += 1;
-      return "No deberia ejecutarse";
+      return "El curso se organiza en 4 unidades tematicas.";
     }
   });
 
   const response = await handler({
     httpMethod: "POST",
-    body: JSON.stringify({ message: "¿En que horario son las clases?" })
+    body: JSON.stringify({ message: "Cuantas unidades?" })
   });
 
   const payload = JSON.parse(response.body);
 
   assert.equal(response.statusCode, 200);
-  assert.equal(payload.source, "faq");
-  assert.equal(providerCalls, 0);
+  assert.equal(payload.source, "llm");
+  assert.match(payload.message, /4 unidades/);
+  assert.equal(providerCalls, 1);
 });
 
-test("la funcion bloquea preguntas fuera de contexto", async () => {
+test("la funcion usa el proveedor para preguntas ambiguas o fuera de contexto si existe LLM", async () => {
+  let providerCalls = 0;
   const handler = createChatHandler({
     readCourseData: async () => sampleCourseData,
-    callProvider: async () => "No deberia ejecutarse"
+    callProvider: async () => {
+      providerCalls += 1;
+      return "No identifique con claridad a que parte del curso te refieres. Puedes indicarme si preguntas por contenidos, foros, evaluaciones o lecturas?";
+    }
+  });
+
+  const response = await handler({
+    httpMethod: "POST",
+    body: JSON.stringify({ message: "Necesito una receta para pizza" })
+  });
+
+  const payload = JSON.parse(response.body);
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(payload.source, "llm");
+  assert.match(payload.message, /No identifique con claridad/);
+  assert.equal(providerCalls, 1);
+});
+
+test("si no hay proveedor configurado, se mantiene el rechazo estatico fuera de contexto", async () => {
+  const handler = createChatHandler({
+    readCourseData: async () => sampleCourseData,
+    callProvider: async () => {
+      throw new ConfigurationError("Falta la variable de entorno OPENAI_API_KEY.");
+    }
   });
 
   const response = await handler({
@@ -89,14 +137,14 @@ test("la funcion usa el proveedor para preguntas del curso sin FAQ exacta", asyn
 
   assert.equal(response.statusCode, 200);
   assert.equal(payload.source, "llm");
-  assert.match(capturedPrompt.systemPrompt, /Contexto del curso/);
+  assert.match(capturedPrompt.systemPrompt, /Bloque oficial de informacion del curso/);
 });
 
 test("el proveedor reporta falta de configuracion cuando no existe API key", async () => {
   await assert.rejects(
     callProvider({
-      provider: "grok",
-      model: "grok-4.3",
+      provider: "kimi",
+      model: "kimi-k2.5",
       prompt: { systemPrompt: "Sistema", userPrompt: "Usuario" },
       env: {},
       fetchImpl: async () => {
@@ -108,10 +156,10 @@ test("el proveedor reporta falta de configuracion cuando no existe API key", asy
 });
 
 test("genera la configuracion correcta para proveedores soportados", () => {
-  assert.equal(getProviderSettings("grok", "grok-4.3").envKey, "XAI_API_KEY");
+  assert.equal(getProviderSettings("kimi", "kimi-k2.5").envKey, "MOONSHOT_API_KEY");
   assert.equal(getProviderSettings("gemini", "gemini-2.5-flash").type, "gemini");
   assert.equal(getProviderSettings("openai", "gpt-5.4").type, "openai-responses");
-  assert.equal(getProviderSettings("grok", "grok-4.3").type, "openai-responses");
+  assert.equal(getProviderSettings("kimi", "kimi-k2.5").type, "openai-compatible");
 });
 
 test("OpenAI Responses parsea output_text correctamente", async () => {
@@ -130,26 +178,23 @@ test("OpenAI Responses parsea output_text correctamente", async () => {
   assert.equal(reply, "Respuesta desde OpenAI");
 });
 
-test("Grok usa Responses API de xAI", async () => {
+test("Kimi usa Chat Completions compatible con OpenAI", async () => {
   let requestBody = null;
   const responseBody = {
-    output: [
+    choices: [
       {
-        content: [
-          {
-            type: "output_text",
-            text: "Respuesta desde Grok"
-          }
-        ]
+        message: {
+          content: "Respuesta desde Kimi"
+        }
       }
     ]
   };
 
   const reply = await callProvider({
-    provider: "grok",
-    model: "grok-4.3",
+    provider: "kimi",
+    model: "kimi-k2.5",
     prompt: { systemPrompt: "Sistema", userPrompt: "Usuario" },
-    env: { XAI_API_KEY: "demo-key" },
+    env: { MOONSHOT_API_KEY: "demo-key" },
     fetchImpl: async (_url, options) => {
       requestBody = JSON.parse(options.body);
 
@@ -160,8 +205,9 @@ test("Grok usa Responses API de xAI", async () => {
     }
   });
 
-  assert.equal(reply, "Respuesta desde Grok");
-  assert.equal(requestBody.model, "grok-4.3");
-  assert.equal(requestBody.input[0].role, "system");
-  assert.equal(requestBody.input[1].role, "user");
+  assert.equal(reply, "Respuesta desde Kimi");
+  assert.equal(requestBody.model, "kimi-k2.5");
+  assert.equal(Object.hasOwn(requestBody, "temperature"), false);
+  assert.equal(requestBody.messages[0].role, "system");
+  assert.equal(requestBody.messages[1].role, "user");
 });

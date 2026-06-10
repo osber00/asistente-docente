@@ -16,11 +16,11 @@ const PROVIDER_PRESETS = {
     envKey: "GEMINI_API_KEY",
     note: "Freemium. Es la opcion recomendada para primeros talleres y pruebas con estudiantes."
   },
-  grok: {
-    label: "Grok",
-    model: "grok-4.3",
-    envKey: "XAI_API_KEY",
-    note: "Freemium. Buena alternativa conversacional cuando deseas variar el proveedor."
+  kimi: {
+    label: "Kimi 2.5",
+    model: "kimi-k2.5",
+    envKey: "MOONSHOT_API_KEY",
+    note: "Compatible con OpenAI Chat Completions usando Moonshot. La plantilla omite temperature porque Kimi 2.5 restringe ese parametro."
   },
   openai: {
     label: "OpenAI GPT-5.4",
@@ -48,6 +48,28 @@ function faqToLines(items) {
   return (items || []).map((item) => `${item.question} | ${item.answer}`).join("\n");
 }
 
+function buildKnowledgeBase(data) {
+  if (data.courseContext.knowledgeBase) {
+    return data.courseContext.knowledgeBase;
+  }
+
+  const sections = [
+    data.courseContext.description,
+    data.courseContext.schedule,
+    data.courseContext.assessments,
+    data.courseContext.units,
+    data.courseContext.forums,
+    data.courseContext.recommendedReadings,
+    data.courseContext.communicationPolicy,
+    (data.courseContext.allowedTopics || []).length ? `Temas permitidos: ${(data.courseContext.allowedTopics || []).join(", ")}.` : "",
+    (data.courseContext.rules || []).length ? `Reglas del asistente: ${(data.courseContext.rules || []).join(" ")}` : "",
+    (data.assistant.suggestionChips || []).length ? `Preguntas sugeridas: ${(data.assistant.suggestionChips || []).join(" | ")}` : "",
+    (data.courseContext.faq || []).length ? `Preguntas frecuentes:\n${faqToLines(data.courseContext.faq)}` : ""
+  ];
+
+  return sections.filter(Boolean).join("\n\n");
+}
+
 function fillForm(data) {
   configForm.elements.courseName.value = data.courseName;
   configForm.elements.teacherName.value = data.teacherName;
@@ -58,14 +80,7 @@ function fillForm(data) {
   configForm.elements.outOfScopeMessage.value = data.assistant.outOfScopeMessage;
   configForm.elements.provider.value = data.llm.provider;
   configForm.elements.model.value = data.llm.model;
-  configForm.elements.description.value = data.courseContext.description || "";
-  configForm.elements.schedule.value = data.courseContext.schedule || "";
-  configForm.elements.assessments.value = data.courseContext.assessments || "";
-  configForm.elements.communicationPolicy.value = data.courseContext.communicationPolicy || "";
-  configForm.elements.allowedTopics.value = joinLines(data.courseContext.allowedTopics);
-  configForm.elements.rules.value = joinLines(data.courseContext.rules);
-  configForm.elements.suggestionChips.value = joinLines(data.assistant.suggestionChips);
-  configForm.elements.faq.value = faqToLines(data.courseContext.faq);
+  configForm.elements.knowledgeBase.value = buildKnowledgeBase(data);
   updateProviderUI(data.llm.provider, false);
 }
 
@@ -92,7 +107,36 @@ function parseFaq(value) {
     .filter((item) => item.question && item.answer);
 }
 
+function buildSuggestionChipsFromKnowledgeBase(knowledgeBase) {
+  const hints = [];
+  const normalized = knowledgeBase.toLowerCase();
+
+  if (normalized.includes("metodolog")) {
+    hints.push("¿Cual es la metodologia del curso?");
+  }
+
+  if (normalized.includes("foro")) {
+    hints.push("¿Hay foros?");
+  }
+
+  if (normalized.includes("lectura")) {
+    hints.push("¿Que lecturas recomendadas hay?");
+  }
+
+  if (normalized.includes("unidad")) {
+    hints.push("¿Cuantas unidades tiene el curso?");
+  }
+
+  if (normalized.includes("evalua") || normalized.includes("nota")) {
+    hints.push("¿Como se evalua el curso?");
+  }
+
+  return hints.slice(0, 4);
+}
+
 function buildPayload(form) {
+  const knowledgeBase = form.elements.knowledgeBase.value.trim();
+
   return {
     courseName: form.elements.courseName.value.trim(),
     teacherName: form.elements.teacherName.value.trim(),
@@ -105,20 +149,14 @@ function buildPayload(form) {
       welcomeMessage: form.elements.welcomeMessage.value.trim(),
       systemPrompt: form.elements.systemPrompt.value.trim(),
       outOfScopeMessage: form.elements.outOfScopeMessage.value.trim(),
-      suggestionChips: splitLines(form.elements.suggestionChips.value)
+      suggestionChips: buildSuggestionChipsFromKnowledgeBase(knowledgeBase)
     },
     llm: {
       provider: form.elements.provider.value,
       model: form.elements.model.value.trim()
     },
     courseContext: {
-      description: form.elements.description.value.trim(),
-      schedule: form.elements.schedule.value.trim(),
-      assessments: form.elements.assessments.value.trim(),
-      communicationPolicy: form.elements.communicationPolicy.value.trim(),
-      allowedTopics: splitLines(form.elements.allowedTopics.value),
-      rules: splitLines(form.elements.rules.value),
-      faq: parseFaq(form.elements.faq.value)
+      knowledgeBase
     }
   };
 }
@@ -128,16 +166,8 @@ function validatePayload(payload) {
     throw new Error("Debes completar el nombre del curso y del docente.");
   }
 
-  if (!payload.courseContext.description) {
-    throw new Error("Debes incluir una descripcion del curso.");
-  }
-
-  if (!payload.courseContext.allowedTopics.length) {
-    throw new Error("Incluye al menos un tema permitido para orientar el alcance del asistente.");
-  }
-
-  if (!payload.courseContext.faq.length) {
-    throw new Error("Incluye al menos una pregunta frecuente para que el asistente tenga respuestas directas.");
+  if (!payload.courseContext.knowledgeBase) {
+    throw new Error("Debes incluir el bloque unico de informacion del curso.");
   }
 }
 

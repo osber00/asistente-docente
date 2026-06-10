@@ -31,6 +31,46 @@ const STOP_WORDS = new Set([
 ]);
 
 const GREETINGS = new Set(["hola", "buenas", "buenos dias", "buenas tardes", "buenas noches"]);
+const ACADEMIC_HINTS = new Set([
+  "actividad",
+  "actividades",
+  "bibliografia",
+  "clase",
+  "clases",
+  "contenido",
+  "contenidos",
+  "correo",
+  "cronograma",
+  "docente",
+  "evaluacion",
+  "evaluaciones",
+  "examen",
+  "examenes",
+  "foro",
+  "foros",
+  "horario",
+  "horarios",
+  "lectura",
+  "lecturas",
+  "metodologia",
+  "modulo",
+  "modulos",
+  "participacion",
+  "proyecto",
+  "proyectos",
+  "recurso",
+  "recursos",
+  "rubrica",
+  "rubricas",
+  "tarea",
+  "tareas",
+  "tema",
+  "temas",
+  "unidad",
+  "unidades"
+]);
+
+const SHORT_QUESTION_TOKEN_LIMIT = 4;
 
 function normalizeText(value) {
   return String(value || "")
@@ -66,19 +106,25 @@ function scoreOverlap(sourceTokens, targetTokens) {
 }
 
 function buildCourseKeywordSet(courseData) {
-  const values = [
-    courseData.courseName,
-    courseData.teacherName,
-    courseData.courseContext.description,
-    courseData.courseContext.schedule,
-    courseData.courseContext.assessments,
-    courseData.courseContext.communicationPolicy,
-    ...(courseData.courseContext.allowedTopics || []),
-    ...(courseData.courseContext.rules || []),
-    ...(courseData.courseContext.faq || []).flatMap((item) => [item.question, item.answer])
-  ];
+  const values = [courseData.courseName, courseData.teacherName, ...collectStringValues(courseData.courseContext)];
 
   return tokenize(values.join(" "));
+}
+
+function collectStringValues(value) {
+  if (typeof value === "string") {
+    return [value];
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => collectStringValues(item));
+  }
+
+  if (value && typeof value === "object") {
+    return Object.values(value).flatMap((item) => collectStringValues(item));
+  }
+
+  return [];
 }
 
 function findDirectFaqMatch(question, faqItems) {
@@ -110,10 +156,32 @@ function findDirectFaqMatch(question, faqItems) {
 
 function findRelevantTopics(question, allowedTopics) {
   const normalizedQuestion = normalizeText(question);
+  const questionTokens = tokenize(question);
 
   return (allowedTopics || []).filter((topic) => {
     const normalizedTopic = normalizeText(topic);
-    return normalizedTopic && normalizedQuestion.includes(normalizedTopic);
+    const topicTokens = tokenize(topic);
+
+    return normalizedTopic && (
+      normalizedQuestion.includes(normalizedTopic) ||
+      scoreOverlap(topicTokens, questionTokens) >= 0.5
+    );
+  });
+}
+
+function hasAcademicHint(questionTokens) {
+  return questionTokens.some((token) => {
+    if (ACADEMIC_HINTS.has(token)) {
+      return true;
+    }
+
+    for (const hint of ACADEMIC_HINTS) {
+      if (token.startsWith(hint) || hint.startsWith(token)) {
+        return true;
+      }
+    }
+
+    return false;
   });
 }
 
@@ -125,10 +193,12 @@ function findBestCourseMatch(question, courseData) {
   const courseKeywords = buildCourseKeywordSet(courseData);
   const scopeScore = scoreOverlap(courseKeywords, questionTokens);
   const isGreeting = GREETINGS.has(normalizedQuestion);
+  const isShortAcademicQuestion = questionTokens.length > 0 && questionTokens.length <= SHORT_QUESTION_TOKEN_LIMIT && hasAcademicHint(questionTokens);
   const isInScope = Boolean(
     isGreeting ||
     directFaqMatch ||
     relevantTopics.length ||
+    isShortAcademicQuestion ||
     scopeScore >= 0.2
   );
 
@@ -137,6 +207,7 @@ function findBestCourseMatch(question, courseData) {
     isInScope,
     directFaqMatch,
     relevantTopics,
+    isShortAcademicQuestion,
     scopeScore,
     questionTokens
   };

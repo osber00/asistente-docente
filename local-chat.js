@@ -64,6 +64,22 @@
     return matches / targetTokens.length;
   }
 
+  function collectStringValues(value) {
+    if (typeof value === "string") {
+      return [value];
+    }
+
+    if (Array.isArray(value)) {
+      return value.flatMap((item) => collectStringValues(item));
+    }
+
+    if (value && typeof value === "object") {
+      return Object.values(value).flatMap((item) => collectStringValues(item));
+    }
+
+    return [];
+  }
+
   function findDirectFaqMatch(question, faqItems) {
     const normalizedQuestion = normalizeText(question);
     const questionTokens = tokenize(question);
@@ -93,27 +109,78 @@
 
   function findRelevantTopics(question, allowedTopics) {
     const normalizedQuestion = normalizeText(question);
+    const questionTokens = tokenize(question);
 
     return (allowedTopics || []).filter((topic) => {
       const normalizedTopic = normalizeText(topic);
-      return normalizedTopic && normalizedQuestion.includes(normalizedTopic);
+      const topicTokens = tokenize(topic);
+
+      return normalizedTopic && (
+        normalizedQuestion.includes(normalizedTopic) ||
+        scoreOverlap(topicTokens, questionTokens) >= 0.5
+      );
     });
   }
 
   function buildCourseKeywordSet(courseData) {
-    const values = [
-      courseData.courseName,
-      courseData.teacherName,
-      courseData.courseContext.description,
-      courseData.courseContext.schedule,
-      courseData.courseContext.assessments,
-      courseData.courseContext.communicationPolicy,
-      ...(courseData.courseContext.allowedTopics || []),
-      ...(courseData.courseContext.rules || []),
-      ...(courseData.courseContext.faq || []).flatMap((item) => [item.question, item.answer])
-    ];
+    const values = [courseData.courseName, courseData.teacherName, ...collectStringValues(courseData.courseContext)];
 
     return tokenize(values.join(" "));
+  }
+
+  function hasAcademicHint(questionTokens) {
+    const academicHints = new Set([
+      "actividad",
+      "actividades",
+      "bibliografia",
+      "clase",
+      "clases",
+      "contenido",
+      "contenidos",
+      "correo",
+      "cronograma",
+      "docente",
+      "evaluacion",
+      "evaluaciones",
+      "examen",
+      "examenes",
+      "foro",
+      "foros",
+      "horario",
+      "horarios",
+      "lectura",
+      "lecturas",
+      "metodologia",
+      "modulo",
+      "modulos",
+      "participacion",
+      "proyecto",
+      "proyectos",
+      "recurso",
+      "recursos",
+      "rubrica",
+      "rubricas",
+      "tarea",
+      "tareas",
+      "tema",
+      "temas",
+      "unidad",
+      "unidades"
+    ]);
+
+    return questionTokens.some((token) => {
+      if (academicHints.has(token)) {
+        return true;
+      }
+
+      for (const hint of academicHints) {
+        if (token.startsWith(hint) || hint.startsWith(token)) {
+          return true;
+        }
+      }
+
+      return false;
+    });
   }
 
   function evaluateQuestion(question, courseData) {
@@ -125,7 +192,8 @@
     const courseKeywords = buildCourseKeywordSet(courseData);
     const scopeScore = scoreOverlap(courseKeywords, questionTokens);
     const isGreeting = greetings.has(normalizedQuestion);
-    const isInScope = Boolean(isGreeting || directFaqMatch || relevantTopics.length || scopeScore >= 0.2);
+    const isShortAcademicQuestion = questionTokens.length > 0 && questionTokens.length <= 4 && hasAcademicHint(questionTokens);
+    const isInScope = Boolean(isGreeting || directFaqMatch || relevantTopics.length || isShortAcademicQuestion || scopeScore >= 0.2);
 
     if (isGreeting) {
       return {

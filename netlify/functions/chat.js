@@ -60,13 +60,6 @@ function createChatHandler(dependencies = {}) {
         });
       }
 
-      if (!courseMatch.isInScope) {
-        return jsonResponse(200, {
-          message: courseData.assistant.outOfScopeMessage,
-          source: "guardrail"
-        });
-      }
-
       const prompt = buildPrompt(courseData, message, courseMatch);
 
       try {
@@ -82,6 +75,13 @@ function createChatHandler(dependencies = {}) {
         });
       } catch (error) {
         if (error instanceof ConfigurationError) {
+          if (!courseMatch.isInScope) {
+            return jsonResponse(200, {
+              message: courseData.assistant.outOfScopeMessage,
+              source: "guardrail"
+            });
+          }
+
           return jsonResponse(200, {
             message: "No encontre una respuesta exacta en las FAQ y el proveedor de IA aun no esta configurado en Netlify.",
             source: "configuration"

@@ -1,6 +1,6 @@
 {
   "courseName": "Didactica Universitaria con IA",
-  "teacherName": "Dra. Laura Medina",
+  "teacherName": "Carla Torres",
   "theme": {
     "primaryColor": "#af4308",
     "accentColor": "#0639b2",
@@ -8,7 +8,7 @@
   },
   "assistant": {
     "welcomeMessage": "Hola. Soy el asistente virtual del curso. Puedo ayudarte con contenidos, evaluaciones, cronograma y reglas de la asignatura.",
-    "systemPrompt": "Responde solo con base en la informacion del curso. Si la pregunta no pertenece al curso o no existe informacion suficiente, indicalo con claridad y sugiere consultar al docente.",
+    "systemPrompt": "Responde solo con base en la informacion del curso. Atiende las dudas como apoyo para estudiantes, con un tono amable y claro. Si la pregunta es ambigua, pide una aclaracion breve. Si la pregunta no pertenece al curso o no existe informacion suficiente, indicalo con claridad y sugiere consultar al docente.",
     "outOfScopeMessage": "Solo puedo responder preguntas relacionadas con este curso.",
     "suggestionChips": [
       "¿Cual es la metodologia del curso?",
@@ -17,43 +17,10 @@
     ]
   },
   "llm": {
-    "provider": "gemini",
-    "model": "gemini-2.5-flash"
+    "provider": "openai",
+    "model": "gpt-5.4"
   },
   "courseContext": {
-    "description": "Curso enfocado en el diseno de experiencias de aprendizaje apoyadas con inteligencia artificial aplicada al contexto universitario.",
-    "schedule": "Las clases se desarrollan los martes de 18:00 a 20:00. La asesoria virtual se realiza los jueves de 17:00 a 18:00.",
-    "assessments": "La nota final se compone de 30% participacion, 30% avance de proyecto y 40% proyecto final. La entrega final ocurre en la semana 16.",
-    "communicationPolicy": "Las consultas academicas se atienden por el asistente virtual y por correo institucional. Las solicitudes de recalificacion solo se atienden por correo del docente.",
-    "allowedTopics": [
-      "contenidos",
-      "evaluaciones",
-      "cronograma",
-      "horarios",
-      "metodologia",
-      "bibliografia",
-      "proyecto final",
-      "participacion"
-    ],
-    "rules": [
-      "No inventar informacion.",
-      "No responder fuera del contexto del curso.",
-      "Si la informacion no aparece en el curso, sugerir consultar al docente.",
-      "Responder siempre en espanol claro y breve."
-    ],
-    "faq": [
-      {
-        "question": "Cuando es la entrega del proyecto final?",
-        "answer": "La entrega del proyecto final esta programada para la semana 16 del semestre."
-      },
-      {
-        "question": "Como se evalua la participacion?",
-        "answer": "La participacion vale el 20% de la nota final y considera intervenciones en clase y actividades guiadas."
-      },
-      {
-        "question": "En que horario son las clases?",
-        "answer": "Las clases se dictan los martes de 18:00 a 20:00."
-      }
-    ]
+    "knowledgeBase": "Curso enfocado en el diseno de experiencias de aprendizaje apoyadas con inteligencia artificial aplicada al contexto universitario.\n\nLa metodologia del curso combina clases guiadas, debate, actividades aplicadas y un proyecto final.\n\nLas clases se desarrollan los martes de 18:00 a 20:00. La asesoria virtual se realiza los jueves de 17:00 a 18:00.\n\nLa nota final se compone de 30% participacion, 30% avance de proyecto y 40% proyecto final. La entrega final ocurre en la semana 16.\n\nEl curso se organiza en 4 unidades: fundamentos de didactica, diseno de experiencias, integracion de IA y evaluacion de propuestas educativas.\n\nSi, hay 2 foros obligatorios en el semestre. Uno en la semana 5 sobre etica y otro en la semana 11 sobre implementacion de IA en el aula.\n\nLas lecturas recomendadas se publican por unidad en el aula virtual. Para iniciar, revisa el capitulo 1 de didactica universitaria y el documento base sobre usos pedagogicos de IA compartido en la primera semana.\n\nLas consultas academicas se atienden por el asistente virtual y por correo institucional. Las solicitudes de recalificacion solo se atienden por correo del docente.\n\nEl asistente debe responder solo sobre contenidos, evaluaciones, cronograma, metodologia, lecturas, unidades, foros, recursos y proyecto final. Si la informacion no aparece en este bloque, debe indicar que el estudiante consulte al docente."
   }
 }

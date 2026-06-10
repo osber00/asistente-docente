@@ -16,7 +16,7 @@
         <p class="hero-note">La proteccion de esta pagina es basica y solo evita ediciones accidentales. No reemplaza autenticacion real.</p>
         <div class="info-strip">
           <span class="status-badge">Gemini: recomendado para empezar</span>
-          <span class="status-badge">Grok: alternativa conversacional</span>
+          <span class="status-badge">Kimi 2.5: compatible con OpenAI</span>
           <span class="status-badge warning">OpenAI GPT-5.4: servicio pago</span>
         </div>
       </section>
@@ -69,7 +69,7 @@
           <section class="config-section provider-section">
             <div class="section-heading">
               <h2>Servicio de IA</h2>
-              <p>El docente elige entre Gemini, Grok y OpenAI. OpenAI se muestra como servicio pago.</p>
+              <p>El docente elige entre Gemini, Kimi 2.5 y OpenAI. OpenAI se muestra como servicio pago.</p>
             </div>
 
             <div class="provider-grid" id="provider-grid">
@@ -77,9 +77,9 @@
                 <strong>Gemini</strong>
                 <span>Freemium. Recomendado para talleres y primeras pruebas.</span>
               </button>
-              <button class="provider-card" type="button" data-provider-option="grok">
-                <strong>Grok</strong>
-                <span>Freemium. Conversacional y rapido para apoyo academico.</span>
+              <button class="provider-card" type="button" data-provider-option="kimi">
+                <strong>Kimi 2.5</strong>
+                <span>Compatible con OpenAI. Buena opcion para contexto largo y tareas generales.</span>
               </button>
               <button class="provider-card" type="button" data-provider-option="openai">
                 <strong>OpenAI GPT-5.4</strong>
@@ -92,7 +92,7 @@
                 <span>Proveedor LLM</span>
                 <select name="provider">
                   <option value="gemini">Gemini</option>
-                  <option value="grok">Grok</option>
+                  <option value="kimi">Kimi 2.5</option>
                   <option value="openai">OpenAI</option>
                 </select>
               </label>
@@ -131,49 +131,14 @@
 
           <section class="config-section">
             <div class="section-heading">
-              <h2>Contenido del curso</h2>
-              <p>Entre mas claro sea este bloque, mejores respuestas dara el asistente.</p>
+              <h2>Contexto del curso</h2>
+              <p>Escribe toda la informacion relevante del curso en un solo bloque: metodologia, unidades, lecturas, foros, evaluaciones, horarios, canales de contacto y cualquier regla clave para estudiantes.</p>
             </div>
 
             <div class="form-grid">
               <label class="full-width">
-                <span>Descripcion del curso</span>
-                <textarea name="description" rows="4" required></textarea>
-              </label>
-
-              <label class="full-width">
-                <span>Cronograma u horarios</span>
-                <textarea name="schedule" rows="3"></textarea>
-              </label>
-
-              <label class="full-width">
-                <span>Evaluaciones</span>
-                <textarea name="assessments" rows="3"></textarea>
-              </label>
-
-              <label class="full-width">
-                <span>Politica de comunicacion</span>
-                <textarea name="communicationPolicy" rows="3"></textarea>
-              </label>
-
-              <label class="full-width">
-                <span>Temas permitidos, uno por linea</span>
-                <textarea name="allowedTopics" rows="5"></textarea>
-              </label>
-
-              <label class="full-width">
-                <span>Reglas del asistente, una por linea</span>
-                <textarea name="rules" rows="5"></textarea>
-              </label>
-
-              <label class="full-width">
-                <span>Preguntas sugeridas, una por linea</span>
-                <textarea name="suggestionChips" rows="4"></textarea>
-              </label>
-
-              <label class="full-width">
-                <span>FAQ en formato pregunta | respuesta, una por linea</span>
-                <textarea name="faq" rows="8"></textarea>
+                <span>Bloque unico de informacion del curso</span>
+                <textarea name="knowledgeBase" rows="16" required placeholder="Ejemplo:\nEl curso se organiza en 4 unidades...\nHay 2 foros obligatorios...\nLas lecturas recomendadas se publican por unidad...\nLa metodologia combina clases guiadas, debate y proyecto final..."></textarea>
               </label>
             </div>
           </section>

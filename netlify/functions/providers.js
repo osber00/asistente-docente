@@ -59,13 +59,13 @@ function getProviderSettings(provider, model) {
         url: "https://api.openai.com/v1/responses",
         type: "openai-responses"
       };
-    case "grok":
+    case "kimi":
       return {
         provider: normalizedProvider,
         model,
-        envKey: "XAI_API_KEY",
-        url: "https://api.x.ai/v1/responses",
-        type: "openai-responses"
+        envKey: "MOONSHOT_API_KEY",
+        url: "https://api.moonshot.ai/v1/chat/completions",
+        type: "openai-compatible"
       };
     case "gemini":
       return {
@@ -95,20 +95,25 @@ function extractOpenAIResponsesText(data) {
 }
 
 async function callOpenAICompatible(settings, apiKey, prompt, fetchImpl) {
+  const body = {
+    model: settings.model,
+    messages: [
+      { role: "system", content: prompt.systemPrompt },
+      { role: "user", content: prompt.userPrompt }
+    ]
+  };
+
+  if (settings.provider !== "kimi") {
+    body.temperature = 0.2;
+  }
+
   const response = await fetchImpl(settings.url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`
     },
-    body: JSON.stringify({
-      model: settings.model,
-      temperature: 0.2,
-      messages: [
-        { role: "system", content: prompt.systemPrompt },
-        { role: "user", content: prompt.userPrompt }
-      ]
-    })
+    body: JSON.stringify(body)
   });
 
   const { data, rawBody } = await parseProviderResponse(response);
@@ -127,26 +132,12 @@ async function callOpenAICompatible(settings, apiKey, prompt, fetchImpl) {
 }
 
 async function callOpenAIResponses(settings, apiKey, prompt, fetchImpl) {
-  const body = settings.provider === "grok"
-    ? {
-        model: settings.model,
-        input: [
-          {
-            role: "system",
-            content: prompt.systemPrompt
-          },
-          {
-            role: "user",
-            content: prompt.userPrompt
-          }
-        ]
-      }
-    : {
-        model: settings.model,
-        temperature: 0.2,
-        instructions: prompt.systemPrompt,
-        input: prompt.userPrompt
-      };
+  const body = {
+    model: settings.model,
+    temperature: 0.2,
+    instructions: prompt.systemPrompt,
+    input: prompt.userPrompt
+  };
 
   const response = await fetchImpl(settings.url, {
     method: "POST",

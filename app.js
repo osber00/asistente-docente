@@ -10,6 +10,7 @@ const sendButtonNode = document.querySelector("#send-button");
 const templateNode = document.querySelector("#message-template");
 
 let courseData = null;
+let typingIndicatorNode = null;
 
 async function loadCourseData() {
   const response = await fetch("./course-data.json", { cache: "no-store" });
@@ -62,7 +63,7 @@ function renderCourseData(data) {
 function formatProviderLabel(provider, model) {
   const labels = {
     gemini: "Gemini",
-    grok: "Grok",
+    kimi: "Kimi",
     openai: "OpenAI"
   };
 
@@ -77,10 +78,55 @@ function appendMessage(role, text) {
 
   article.classList.add(role);
   roleNode.textContent = role === "assistant" ? "Asistente" : "Estudiante";
-  textNode.textContent = text;
+  textNode.innerHTML = formatMessageText(text);
 
   chatLogNode.append(article);
   chatLogNode.scrollTop = chatLogNode.scrollHeight;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatMessageText(text) {
+  const escaped = escapeHtml(text);
+
+  return escaped
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\n/g, "<br>");
+}
+
+function showTypingIndicator() {
+  if (typingIndicatorNode) {
+    return;
+  }
+
+  const fragment = templateNode.content.cloneNode(true);
+  const article = fragment.querySelector(".message");
+  const roleNode = fragment.querySelector(".message-role");
+  const textNode = fragment.querySelector(".message-text");
+
+  article.classList.add("assistant", "typing-indicator");
+  roleNode.textContent = "Asistente";
+  textNode.innerHTML = "<span class=\"typing-dots\"><span></span><span></span><span></span></span><span class=\"typing-copy\">Escribiendo respuesta...</span>";
+
+  typingIndicatorNode = article;
+  chatLogNode.append(article);
+  chatLogNode.scrollTop = chatLogNode.scrollHeight;
+}
+
+function hideTypingIndicator() {
+  if (!typingIndicatorNode) {
+    return;
+  }
+
+  typingIndicatorNode.remove();
+  typingIndicatorNode = null;
 }
 
 function setSendingState(isSending) {
@@ -147,11 +193,14 @@ formNode.addEventListener("submit", async (event) => {
   appendMessage("student", message);
   messageNode.value = "";
   setSendingState(true);
+  showTypingIndicator();
 
   try {
     const payload = await sendMessage(message);
+    hideTypingIndicator();
     appendMessage("assistant", payload.message);
   } catch (error) {
+    hideTypingIndicator();
     if (error.message === "BACKEND_UNAVAILABLE") {
       const payload = fallbackToLocalMode(message);
       appendMessage("assistant", payload.message);
