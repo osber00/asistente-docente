@@ -1,15 +1,10 @@
-const { readFile } = require("node:fs/promises");
-const path = require("node:path");
-
 const { findBestCourseMatch } = require("./context-matcher");
 const { buildPrompt } = require("./prompt-builder");
 const { callProvider, ConfigurationError } = require("./providers");
+const courseData = require("../course-data");
 
-const COURSE_DATA_PATH = path.join(__dirname, "..", "..", "course-data.json");
-
-async function readCourseData() {
-  const source = await readFile(COURSE_DATA_PATH, "utf8");
-  return JSON.parse(source);
+function readCourseData() {
+  return courseData;
 }
 
 function jsonResponse(statusCode, payload) {

@@ -185,11 +185,18 @@ async function sendMessage(message) {
 }
 
 function fallbackToLocalMode(message) {
-  if (!window.LocalCourseChat || !courseData) {
+  if (!courseData) {
     throw new Error("No se pudo activar el modo local de prueba.");
   }
 
-  return window.LocalCourseChat.evaluateQuestion(message, courseData);
+  if (window.LocalCourseChat && typeof window.LocalCourseChat.evaluateQuestion === "function") {
+    return window.LocalCourseChat.evaluateQuestion(message, courseData);
+  }
+
+  return {
+    message: "El servicio de chat no esta disponible en este momento. Intenta de nuevo en unos minutos.",
+    source: "offline"
+  };
 }
 
 async function bootstrap() {
